@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDGANH - AI Consensus Engine v1.0</title>
+    
+    <!-- Google Fonts: Orbitron & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Boxicons for premium icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Highlight.js for code block syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ══ ACCESS GATE OVERLAY ══════════════════════════════════════ -->
+    <div id="access-gate" class="gate-overlay">
+        <div class="gate-bg"></div>
+        <div class="gate-card">
+            <!-- Logo -->
+            <div class="gate-logo-wrap">
+                <div class="gate-logo-main">VDGANH — AI</div>
+                <div class="gate-logo-sub">Consensus Engine · Restricted Access</div>
+            </div>
+            <div class="gate-divider"></div>
+
+            <!-- Limit countdown banner (hidden by default) -->
+            <div id="gate-limit-banner" class="gate-limit-banner hidden">
+                <i class="bx bx-time-five"></i>
+                <span>LIMIT TERDETEKSI &nbsp;—&nbsp;</span>
+                <span id="gate-countdown" class="gate-countdown">00:00:00</span>
+            </div>
+            <p id="gate-limit-hint" class="gate-limit-hint hidden">
+                Kunci limit telah digunakan hari ini. Gunakan <strong style="color:#e2e8f0;">Kunci Tetap</strong> untuk masuk tanpa batasan.
+            </p>
+
+            <!-- Key input form -->
+            <div class="gate-form">
+                <div class="gate-input-wrapper">
+                    <i class="bx bx-key gate-input-icon"></i>
+                    <input type="password" id="gate-key-input" class="gate-input"
+                           placeholder="Masukkan Kunci Akses..."
+                           autocomplete="off" spellcheck="false" />
+                    <button type="button" id="gate-eye-btn" class="gate-eye-btn" title="Tampilkan/sembunyikan kunci">
+                        <i class="bx bx-hide"></i>
+                    </button>
+                </div>
+
+                <div id="gate-error" class="gate-error hidden">
+                    <i class="bx bx-x-circle"></i>
+                    <span id="gate-error-text"></span>
+                </div>
+
+                <button id="gate-submit-btn" class="gate-submit-btn">
+                    <span id="gate-btn-label">MASUK</span>
+                    <i id="gate-btn-icon" class="bx bx-lock-open-alt"></i>
+                </button>
+            </div>
+
+            <div class="gate-footer">VDGANH - AI &copy; 2025 &nbsp;·&nbsp; Hak Akses Dilindungi</div>
+        </div>
+    </div>
+    <!-- ══ END ACCESS GATE ════════════════════════════════════════════ -->
+
+    <div class="stars-bg"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="bx bx-hive hive-icon"></i>
+                <div class="logo-text">
+                    <h1>VDGANH - AI <span>CONSENSUS ENGINE</span></h1>
+                    <p class="version">v1.0 • MULTI-AGENT ORCHESTRATOR</p>
+                </div>
+            </div>
+            
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot online animate-pulse"></span>
+                    <span class="status-label">Consensus Protocol Active</span>
+                </div>
+                
+                <!-- LIMIT KEY COUNTDOWN (shown only when locked) -->
+                <div id="app-limit-countdown" class="app-limit-countdown hidden">
+                    <i class="bx bx-time-five countdown-icon"></i>
+                    <span class="countdown-label">TERLOCK:</span>
+                    <span id="app-countdown-timer" class="countdown-timer">00:00:00</span>
+                </div>
+                
+                <div class="api-key-wrapper">
+                    <button id="toggle-config-btn" class="icon-btn-text" title="Configure Engine Settings">
+                        <i class="bx bx-cog"></i> Configure NIM
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- CONFIG PANEL (COLLAPSIBLE) -->
+        <section id="config-panel" class="config-panel glass-panel hidden">
+            <div class="panel-header">
+                <h3><i class="bx bx-slider-alt"></i> Engine Settings</h3>
+                <button id="close-config-btn" class="close-btn"><i class="bx bx-x"></i></button>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="api-key-input">NVIDIA API Key Override</label>
+                    <div class="input-with-icon">
+                        <i class="bx bx-key"></i>
+                        <input type="password" id="api-key-input" placeholder="nvapi-..." autocomplete="off">
+                        <button id="toggle-key-visibility" class="inner-icon-btn"><i class="bx bx-show"></i></button>
+                    </div>
+                    <small class="help-text">Leave blank to use the built-in system API key.</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="temp-input">Temperature (Creativity)</label>
+                        <input type="range" id="temp-input" min="0.1" max="0.9" step="0.1" value="0.5">
+                        <span id="temp-val" class="range-val">0.5</span>
+                    </div>
+                    <div class="form-group half">
+                        <label for="max-tokens-input">Max Output Tokens</label>
+                        <input type="number" id="max-tokens-input" min="512" max="4096" step="256" value="2048">
+                    </div>
+                </div>
+                
+                <div class="panel-footer">
+                    <button id="test-connection-btn" class="secondary-btn"><i class="bx bx-wifi"></i> Test Connection</button>
+                    <span id="connection-status-msg" class="status-message"></span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- MAIN SECTION -->
+        <main class="main-layout">
+            <!-- LEFT PANEL: INPUT & TIMELINE -->
+            <section class="left-panel">
+
+                <!-- ═══════════════════════════════════════ -->
+                <!-- ANALYSIS MODE SELECTOR                  -->
+                <!-- ═══════════════════════════════════════ -->
+                <div class="mode-selector-card glass-panel">
+                    <div class="card-header">
+                        <h2><i class="bx bx-analyse"></i> Mode Analisis</h2>
+                        <span class="badge badge-cyan" id="mode-label-badge">Chart Data</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mode-grid">
+                            <button class="mode-btn active" id="mode-btn-1" data-mode="1" title="Analisis dari data chart live market">
+                                <i class="bx bx-line-chart"></i>
+                                <span class="mode-name">Chart Data</span>
+                                <span class="mode-desc">Live market feed</span>
+                            </button>
+                            <button class="mode-btn" id="mode-btn-2" data-mode="2" title="Analisis dari teks pertanyaan saja">
+                                <i class="bx bx-text"></i>
+                                <span class="mode-name">Text Only</span>
+                                <span class="mode-desc">Teks pertanyaan</span>
+                            </button>
+                            <button class="mode-btn" id="mode-btn-3" data-mode="3" title="Analisis dari foto beserta keterangan teks">
+                                <i class="bx bx-image-alt"></i>
+                                <span class="mode-name">Photo + Text</span>
+                                <span class="mode-desc">Foto & keterangan</span>
+                            </button>
+                            <button class="mode-btn mode-btn-auto" id="mode-btn-4" data-mode="4" title="Gunakan semua data yang tersedia secara otomatis">
+                                <i class="bx bx-brain"></i>
+                                <span class="mode-name">Auto All</span>
+                                <span class="mode-desc">Semua otomatis</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════ -->
+                <!-- PANEL MARKET (MODE 1 & 4)               -->
+                <!-- ═══════════════════════════════════════ -->
+                <div class="market-card glass-panel" id="panel-market">
+                    <div class="card-header">
+                        <h2><i class="bx bx-line-chart"></i> Market Data</h2>
+                        <span class="badge badge-purple" id="market-status-badge">Menunggu...</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="market-selectors">
+                            <div class="form-group half-width">
+                                <label for="market-symbol">Symbol</label>
+                                <select id="market-symbol" class="market-select">
+                                    <option value="XAUUSD" selected>XAUUSD (Gold)</option>
+                                    <option value="BTCUSD">BTCUSD (Bitcoin)</option>
+                                    <option value="EURUSD">EURUSD</option>
+                                    <option value="GBPUSD">GBPUSD</option>
+                                    <option value="USDJPY">USDJPY</option>
+                                </select>
+                            </div>
+                            <div class="form-group half-width">
+                                <label for="market-timeframe">Timeframe</label>
+                                <select id="market-timeframe" class="market-select">
+                                    <option value="H1">H1 (1 Hour)</option>
+                                    <option value="H4">H4 (4 Hours)</option>
+                                    <option value="D1" selected>D1 (Daily)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="refresh-market-btn" class="refresh-market-full-btn">
+                            <i class="bx bx-refresh"></i> Fetch &amp; Verifikasi Data Market
+                        </button>
+
+                        <!-- Verification Status Grid -->
+                        <div class="verification-grid">
+                            <div class="verif-item" id="verif-symbol"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">Symbol</span></div>
+                            <div class="verif-item" id="verif-timeframe"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">Timeframe</span></div>
+                            <div class="verif-item" id="verif-candles"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">≥200 Candles</span></div>
+                            <div class="verif-item" id="verif-price"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">Last Price</span></div>
+                            <div class="verif-item" id="verif-timestamp"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">Timestamp</span></div>
+                            <div class="verif-item" id="verif-indicators"><i class="bx bx-help-circle status-icon"></i><span class="verif-label">Indicators</span></div>
+                        </div>
+
+                        <!-- Info Panel -->
+                        <div class="market-info-panel hidden" id="market-info-panel">
+                            <div class="info-row"><span>Last Price:</span><strong id="info-last-price">-</strong></div>
+                            <div class="info-row"><span>Candles:</span><strong id="info-candles-count">-</strong></div>
+                            <div class="info-row"><span>Last Candle:</span><strong id="info-last-candle">-</strong></div>
+                            <div class="info-row"><span>Data Age:</span><strong id="info-data-age">-</strong></div>
+                        </div>
+
+                        <!-- Candlestick Chart -->
+                        <div class="market-chart-container hidden" id="market-chart-container">
+                            <div id="tv-chart-el" style="width:100%;height:240px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════ -->
+                <!-- PANEL IMAGE (MODE 3 & 4)                -->
+                <!-- ═══════════════════════════════════════ -->
+                <div class="image-panel-card glass-panel hidden" id="panel-image">
+                    <div class="card-header">
+                        <h2><i class="bx bx-image-alt"></i> Upload Gambar</h2>
+                        <span class="badge">Vision AI</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="image-upload-dropzone" id="image-dropzone">
+                            <input type="file" id="image-file-input" accept="image/*" class="hidden-file-input">
+                            <div class="dropzone-content" id="dropzone-text-content">
+                                <i class="bx bx-image-add upload-icon"></i>
+                                <p class="upload-text">Tarik &amp; lepas gambar atau <span>pilih berkas</span></p>
+                                <p class="upload-hint">JPG, PNG, WEBP · Maks 4MB</p>
+                            </div>
+                            <div class="dropzone-preview hidden" id="image-preview-container">
+                                <img src="" id="image-preview-img" alt="Pratinjau">
+                                <button type="button" id="remove-image-btn" class="remove-image-btn" title="Hapus"><i class="bx bx-trash"></i></button>
+                                <span class="image-size-badge" id="image-size-badge">0 KB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════ -->
+                <!-- TEXT INPUT (SELALU TAMPIL)              -->
+                <!-- ═══════════════════════════════════════ -->
+                <div class="input-card glass-panel">
+                    <div class="card-header">
+                        <h2><i class="bx bx-message-square-edit"></i> Pertanyaan / Instruksi</h2>
+                        <span class="badge">Council Input</span>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="user-question" placeholder="Tuliskan pertanyaan, instruksi analisis, atau keterangan gambar..."></textarea>
+                        <div class="prompt-suggestions" id="prompt-suggestions-area">
+                            <span class="label">Contoh:</span>
+                            <div class="suggestion-chips">
+                                <button class="chip-btn" id="chip-market-1" data-prompt="Analisis XAUUSD. Cari setup entry terbaik berdasarkan data market aktual. Berikan level support, resistance, entry, stop loss, dan take profit yang tepat.">Analisis XAUUSD</button>
+                                <button class="chip-btn" id="chip-text-1" data-prompt="Jelaskan konsep dasar Quantum Computing beserta contoh implementasinya.">Quantum Computing</button>
+                                <button class="chip-btn" id="chip-text-2" data-prompt="Buat arsitektur microservices untuk aplikasi e-commerce skala besar dengan high traffic.">Arsitektur Microservices</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button id="start-consensus-btn" class="primary-glow-btn">
+                            <i class="bx bx-play-circle animate-spin-hover"></i> JALANKAN KONSENSUS AI
+                        </button>
+                    </div>
+                </div>
+
+
+                
+                <!-- COGNITIVE WORKFLOW STATUS -->
+                <div class="workflow-card glass-panel">
+                    <div class="card-header">
+                        <h2><i class="bx bx-network-chart"></i> Engine Execution Timeline</h2>
+                        <span class="badge badge-purple" id="workflow-overall-status">Idle</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-step" id="step-precheck">
+                                <div class="step-icon"><i class="bx bx-shield-quarter"></i></div>
+                                <div class="step-info">
+                                    <h4>Tahap 0: Pre-Flight Verification</h4>
+                                    <p>Memverifikasi koneksi dan kesiapan setiap model NIM endpoint.</p>
+                                    <div class="step-progress-wrapper">
+                                        <div class="step-progress-bar"><div class="fill"></div></div>
+                                        <span class="step-count">0/7 Siap</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-step" id="step-thinking">
+                                <div class="step-icon"><i class="bx bx-brain"></i></div>
+                                <div class="step-info">
+                                    <h4>Tahap 1: Independent Thinking</h4>
+                                    <p>Setiap model berpikir secara mandiri tanpa terpengaruh model lainnya.</p>
+                                    <div class="step-progress-wrapper">
+                                        <div class="step-progress-bar"><div class="fill"></div></div>
+                                        <span class="step-count">0/7 Selesai</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-step" id="step-review">
+                                <div class="step-icon"><i class="bx bx-git-pull-request"></i></div>
+                                <div class="step-info">
+                                    <h4>Tahap 2: Cross Review</h4>
+                                    <p>Kritik silang antar model untuk menemukan kelemahan logika dan asumsi.</p>
+                                    <div class="step-progress-wrapper">
+                                        <div class="step-progress-bar"><div class="fill"></div></div>
+                                        <span class="step-count">0/7 Selesai</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-step" id="step-improve">
+                                <div class="step-icon"><i class="bx bx-trending-up"></i></div>
+                                <div class="step-info">
+                                    <h4>Tahap 3: Improvement Phase</h4>
+                                    <p>Model merevisi &amp; menyempurnakan jawaban berdasarkan kritik yang diterima.</p>
+                                    <div class="step-progress-wrapper">
+                                        <div class="step-progress-bar"><div class="fill"></div></div>
+                                        <span class="step-count">0/7 Selesai</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-step" id="step-consensus">
+                                <div class="step-icon"><i class="bx bx-award"></i></div>
+                                <div class="step-info">
+                                    <h4>Tahap 4: Consensus Building</h4>
+                                    <p>Nemotron menyaring, menyatukan, dan merumuskan konsensus akhir dewan.</p>
+                                    <div class="step-progress-wrapper">
+                                        <div class="step-progress-bar"><div class="fill"></div></div>
+                                        <span class="step-count">Idle</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CONSOLE LOGS -->
+                <div class="console-card glass-panel">
+                    <div class="card-header">
+                        <h2><i class="bx bx-terminal"></i> Orchestrator Logs</h2>
+                        <button id="clear-console-btn" class="icon-btn" title="Clear logs"><i class="bx bx-trash"></i></button>
+                    </div>
+                    <div class="card-body console-body" id="console-logs">
+                        <div class="log-line system">[SYSTEM] VDGANH - AI Consensus Engine initialized. Waiting for input...</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- RIGHT PANEL: AGENTS GRID & OUTPUT -->
+            <section class="right-panel">
+                <!-- AGENTS GRID -->
+                <div class="agents-section">
+                    <div class="section-title">
+                        <h3><i class="bx bx-group"></i> Dewan AI (Council Members)</h3>
+                    </div>
+                    <div class="agents-grid">
+                        <!-- AGENT 1: QWEN -->
+                        <div class="agent-card glass-panel" id="agent-qwen" data-model="qwen/qwen3.5-397b-a17b">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-cyan">Q</div>
+                                <div class="agent-identity">
+                                    <h4>Qwen3.5-397B-A17B</h4>
+                                    <span class="agent-role">Strategic Analyst</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Logika, Analisis, Efisiensi, Konsistensi</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-cyan" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="qwen">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 2: NEMOTRON -->
+                        <div class="agent-card glass-panel" id="agent-nemotron" data-model="nvidia/llama-3.3-nemotron-super-49b-v1.5">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-emerald">N</div>
+                                <div class="agent-identity">
+                                    <h4>Llama-3.3-Nemotron-49B</h4>
+                                    <span class="agent-role">Consensus Chairman / Judge</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Validasi fakta, Akurasi, Objektivitas, Penilaian</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-emerald" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="nemotron">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 3: DEEPSEEK -->
+                        <div class="agent-card glass-panel" id="agent-deepseek" data-model="deepseek-ai/deepseek-v4-pro">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-purple">D</div>
+                                <div class="agent-identity">
+                                    <h4>DeepSeek-V4-Pro</h4>
+                                    <span class="agent-role">Problem Solver / Expert</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Solusi praktis, Implementasi, Langkah teknis</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-purple" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="deepseek">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 4: LLAMA -->
+                        <div class="agent-card glass-panel" id="agent-llama" data-model="meta/llama-3.3-70b-instruct">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-orange">L</div>
+                                <div class="agent-identity">
+                                    <h4>Llama-3.3-70B-Instruct</h4>
+                                    <span class="agent-role">Communication Specialist</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Kejelasan, Summary, Penyederhanaan konsep</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-orange" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="llama">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 5: NEMOTRON-REASONING -->
+                        <div class="agent-card glass-panel" id="agent-nemotron-reasoning" data-model="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-rose">R</div>
+                                <div class="agent-identity">
+                                    <h4>Nemotron-Nano-Omni-30B</h4>
+                                    <span class="agent-role">Reasoning Specialist</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Penalaran multi-langkah, Deduksi, Chain-of-Thought</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-rose" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="nemotron-reasoning">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 6: LLAMA-4-MAVERICK -->
+                        <div class="agent-card glass-panel" id="agent-llama-maverick" data-model="meta/llama-4-maverick-17b-128e-instruct">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-indigo">M</div>
+                                <div class="agent-identity">
+                                    <h4>Llama-4-Maverick-17B</h4>
+                                    <span class="agent-role">Creative Innovator</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Pemikiran lateral, Perspektif baru, Solusi kreatif</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-indigo" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="llama-maverick">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AGENT 7: QWEN3.5-122B-A10B (Code Architect) -->
+                        <div class="agent-card glass-panel" id="agent-qwen-coder" data-model="qwen/qwen3.5-122b-a10b">
+                            <div class="agent-card-header">
+                                <div class="agent-avatar avatar-lime">C</div>
+                                <div class="agent-identity">
+                                    <h4>Qwen3.5-122B-A10B</h4>
+                                    <span class="agent-role">Code Architect</span>
+                                </div>
+                                <div class="agent-status-badge status-idle">IDLE</div>
+                            </div>
+                            <div class="agent-card-body">
+                                <p class="agent-focus"><strong>Fokus:</strong> Kualitas kode, Arsitektur software, Best practices</p>
+                                <div class="agent-progress-box">
+                                    <div class="progress-info">
+                                        <span>Progress</span>
+                                        <span class="pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="fill fill-lime" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="agent-metrics">
+                                    <div class="metric">
+                                        <span class="label">Confidence Score:</span>
+                                        <span class="value val-confidence">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="agent-card-footer">
+                                <button class="secondary-btn btn-view-agent" disabled data-agent="qwen-coder">
+                                    <i class="bx bx-show-alt"></i> View Workspace
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- CONSENSUS OUTPUT DISPLAY -->
+                <div class="output-card glass-panel" id="consensus-output-panel">
+                    <div class="card-header">
+                        <h2><i class="bx bx-checkbox-checked"></i> Consensus Report</h2>
+                        <div class="output-actions">
+                            <button id="copy-markdown-btn" class="icon-btn" title="Copy Raw Markdown" disabled><i class="bx bx-copy"></i></button>
+                            <button id="download-report-btn" class="icon-btn" title="Download Report as HTML/Markdown" disabled><i class="bx bx-download"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body output-placeholder" id="output-placeholder-area">
+                        <div class="placeholder-content">
+                            <i class="bx bx-analyse animate-pulse-slow"></i>
+                            <h3>Menunggu Pemicu Konsensus</h3>
+                            <p>Tulis pertanyaan Anda di panel kiri lalu tekan "JALANKAN PROSES KONSENSUS" untuk mengamati analisis dewan dan mendapatkan jawaban final.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic parsed consensus UI will show up here -->
+                    <div class="card-body output-results hidden" id="output-results-area">
+                        <!-- Row 1: Score & Confidence -->
+                        <div class="result-stats-row">
+                            <div class="stat-card">
+                                <div class="stat-label">CONSENSUS SCORE</div>
+                                <div class="stat-value-container">
+                                    <div class="radial-progress-wrapper">
+                                        <svg class="radial-svg" viewBox="0 0 100 100">
+                                            <circle class="bg" cx="50" cy="50" r="45"></circle>
+                                            <circle class="val" id="score-ring" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+                                        </svg>
+                                        <div class="radial-text" id="consensus-score-val">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-label">TINGKAT KEYAKINAN</div>
+                                <div class="confidence-badge" id="confidence-level-val">Tinggi</div>
+                                <div class="stat-subtext" id="confidence-reason-val">Berdasarkan kesepakatan dewan</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2: Agreed & Disputed Facts -->
+                        <div class="facts-grid">
+                            <div class="facts-card facts-agreed">
+                                <h3><i class="bx bx-check-double text-emerald"></i> FAKTA YANG DISETUJUI</h3>
+                                <ul id="list-agreed-facts">
+                                    <!-- Dynamic list -->
+                                </ul>
+                            </div>
+                            <div class="facts-card facts-disputed">
+                                <h3><i class="bx bx-help-circle text-orange"></i> FAKTA YANG DIPERDEBATKAN</h3>
+                                <ul id="list-disputed-facts">
+                                    <!-- Dynamic list -->
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 3: Final Answer (The Star of the show) -->
+                        <div class="final-answer-section">
+                            <h3><i class="bx bx-star text-yellow"></i> JAWABAN FINAL KONSENSUS</h3>
+                            <div class="markdown-body" id="final-answer-content">
+                                <!-- Rendered Markdown -->
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Chat with Chairman (Qwen3.5) -->
+                        <div id="followup-chat-section" class="final-answer-section hidden" style="margin-top: 24px; border-color: rgba(0,242,254,0.2);">
+                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+                                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="bx bx-message-rounded-dots text-cyan"></i> TANYA KETUA DEWAN (QWEN3.5)</h3>
+                                <span id="qwen-chat-timer" class="badge badge-amber hidden">03:00</span>
+                            </div>
+                            <p style="font-size: 0.85rem; color: #94a3b8; margin: -8px 0 16px 0; line-height: 1.5;">
+                                Diskusikan hasil analisis, tanyakan level entry alternatif, atau minta klarifikasi mengenai keputusan konsensus dewan.
+                            </p>
+                            
+                            <!-- Chat Box UI -->
+                            <div class="chat-box-wrapper" style="background: rgba(6, 9, 18, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 420px;">
+                                <!-- Chat Area scrollable -->
+                                <div id="chat-messages-log" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+                                    <!-- Dynamic chats -->
+                                </div>
+                                <!-- Input bar -->
+                                <div class="chat-input-bar" style="padding: 12px 16px; background: rgba(15, 23, 42, 0.7); border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="chat-user-input" placeholder="Ketik pertanyaan Anda ke Ketua Dewan di sini..." style="flex: 1; padding: 11px 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #e2e8f0; font-size: 0.9rem; outline: none; font-family: inherit; transition: border-color 0.2s;" />
+                                    <button id="chat-send-btn" class="btn btn-purple" style="padding: 11px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; border: none; white-space: nowrap;">
+                                        <span>Kirim</span>
+                                        <i class="bx bx-send"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 4: Council Analysis Summaries -->
+                        <div class="council-summaries-section">
+                            <h3><i class="bx bx-brain"></i> Ringkasan Analisis Dewan AI</h3>
+                            <div class="summaries-accordion">
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-cyan">
+                                        <span>Qwen3.5-397B (Strategic Analyst)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-qwen"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-emerald">
+                                        <span>Llama-3.3-Nemotron-49B (Chairman / Judge)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-nemotron"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-purple">
+                                        <span>DeepSeek-V4-Pro (Problem Solver)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-deepseek"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-orange">
+                                        <span>Llama-3.3-70B (General Expert)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-llama"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-rose">
+                                        <span>Nemotron-Nano-Omni-30B (Reasoning Specialist)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-nemotron-reasoning"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-indigo">
+                                        <span>Llama-4-Maverick-17B (Creative Innovator)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-llama-maverick"></div>
+                                </div>
+                                <div class="accordion-item">
+                                    <button class="accordion-header text-lime">
+                                        <span>qwen/qwen3.5-122b-a10b (Code Architect)</span>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content" id="summary-qwen-coder"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 5: Detailed Reason -->
+                        <div class="consensus-reason-section">
+                            <h3><i class="bx bx-info-circle"></i> Justifikasi Konsensus</h3>
+                            <div id="consensus-reason-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>&copy; 2026 VDGANH - AI Consensus Engine. Powered by NVIDIA NIM Cloud Endpoints.</p>
+        </footer>
+    </div>
+    
+    <!-- MODAL: AGENT WORKSPACE DETAIL -->
+    <div id="agent-workspace-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container glass-panel">
+            <div class="modal-header">
+                <div class="modal-title-wrapper">
+                    <span class="agent-avatar-mini" id="modal-agent-avatar">Q</span>
+                    <h3 id="modal-agent-name">Qwen3.5-397B-A17B</h3>
+                </div>
+                <button id="close-modal-btn" class="close-btn"><i class="bx bx-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="workspace-tabs">
+                    <button class="tab-btn active" data-tab="tab-p1">Phase 1: Thinking</button>
+                    <button class="tab-btn" data-tab="tab-p2">Phase 2: Reviewing</button>
+                    <button class="tab-btn" data-tab="tab-p3">Phase 3: Refined Answer</button>
+                </div>
+                <div class="tab-contents">
+                    <div id="tab-p1" class="tab-pane active">
+                        <h4>Independent Thought Analysis</h4>
+                        <div class="tab-meta">
+                            <span class="confidence-badge-inline">Confidence Score: <strong id="modal-p1-confidence">-</strong></span>
+                        </div>
+                        <div class="pane-content markdown-body" id="modal-p1-content">
+                            <!-- content -->
+                        </div>
+                    </div>
+                    <div id="tab-p2" class="tab-pane">
+                        <h4>Cross-Criticisms of Other Models</h4>
+                        <p class="pane-description">Kritik objektif yang diberikan oleh model ini terhadap jawaban model lain:</p>
+                        <div class="pane-content markdown-body" id="modal-p2-content">
+                            <!-- content -->
+                        </div>
+                    </div>
+                    <div id="tab-p3" class="tab-pane">
+                        <h4>Refined Answer (Self-Improved)</h4>
+                        <div class="tab-meta">
+                            <span class="confidence-badge-inline">Revised Confidence Score: <strong id="modal-p3-confidence">-</strong></span>
+                        </div>
+                        <p class="pane-description">Hasil revisi jawaban setelah menggabungkan feedback dari kritik model lain:</p>
+                        <div class="pane-content markdown-body" id="modal-p3-content">
+                            <!-- content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TradingView Lightweight Charts (pinned v4.1.7) -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.7/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Markdown Parser library (Marked) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <!-- ══ ACCESS GATE JS (runs before app.js) ══════════════════════════ -->
+    <script>
+    (function () {
+        const GATE_EL      = document.getElementById('access-gate');
+        const KEY_INPUT    = document.getElementById('gate-key-input');
+        const SUBMIT_BTN   = document.getElementById('gate-submit-btn');
+        const BTN_LABEL    = document.getElementById('gate-btn-label');
+        const BTN_ICON     = document.getElementById('gate-btn-icon');
+        const ERROR_BOX    = document.getElementById('gate-error');
+        const ERROR_TEXT   = document.getElementById('gate-error-text');
+        const EYE_BTN      = document.getElementById('gate-eye-btn');
+        const LIMIT_BANNER = document.getElementById('gate-limit-banner');
+        const LIMIT_HINT   = document.getElementById('gate-limit-hint');
+        const COUNTDOWN_EL = document.getElementById('gate-countdown');
+
+        let cdInterval = null;
+
+        // ── Helpers ─────────────────────────────────────────────────────────
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function fmtTime(s) {
+            return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor((s % 3600) / 60)) + ':' + pad(s % 60);
+        }
+
+        function showError(msg) {
+            ERROR_TEXT.textContent = msg;
+            ERROR_BOX.classList.remove('hidden');
+            KEY_INPUT.classList.add('error');
+            setTimeout(() => KEY_INPUT.classList.remove('error'), 500);
+        }
+
+        function clearError() {
+            ERROR_BOX.classList.add('hidden');
+            KEY_INPUT.classList.remove('error');
+        }
+
+        function startCountdown(seconds) {
+            let rem = Math.max(0, Math.floor(seconds));
+            COUNTDOWN_EL.textContent = fmtTime(rem);
+            LIMIT_BANNER.classList.remove('hidden');
+            LIMIT_HINT.classList.remove('hidden');
+            if (cdInterval) clearInterval(cdInterval);
+            cdInterval = setInterval(() => {
+                rem--;
+                if (rem <= 0) {
+                    clearInterval(cdInterval);
+                    LIMIT_BANNER.classList.add('hidden');
+                    LIMIT_HINT.classList.add('hidden');
+                } else {
+                    COUNTDOWN_EL.textContent = fmtTime(rem);
+                }
+            }, 1000);
+        }
+
+        function unlockGate() {
+            if (cdInterval) clearInterval(cdInterval);
+            GATE_EL.classList.add('unlocking');
+            setTimeout(() => { GATE_EL.style.display = 'none'; }, 650);
+        }
+
+        function setLoading(on) {
+            SUBMIT_BTN.disabled = on;
+            BTN_LABEL.textContent = on ? 'MEMVERIFIKASI...' : 'MASUK';
+            BTN_ICON.className = on ? 'bx bx-loader-alt bx-spin' : 'bx bx-lock-open-alt';
+        }
+
+        // ── On load: always require password again after refresh ─────────────
+        // Permanent key no longer persists through refresh.
+
+        // Check if device is currently rate-limited (limit key used today)
+        fetch('auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=check_device'
+        }).then(r => r.json()).then(d => {
+            if (d.limited) startCountdown(d.remaining_seconds);
+        }).catch(() => {});
+
+        // ── Eye-toggle disabled - handled by app.js ─────────────────────────────────
+        // Removed to avoid conflicts with app.js event listeners
+
+        KEY_INPUT.addEventListener('input', clearError);
+
+        // ── Submit ───────────────────────────────────────────────────────────
+        async function submit() {
+            const key = KEY_INPUT.value.trim();
+            if (!key) { showError('Kunci akses tidak boleh kosong.'); return; }
+            clearError();
+            setLoading(true);
+            try {
+                const res  = await fetch('auth.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=validate&key=' + encodeURIComponent(key)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.type === 'permanent') {
+                        // Permanent key — still allow refresh to return to login
+                        // do not persist authentication across reload
+                    }
+                    unlockGate();
+                } else {
+                    if (data.type === 'limited') {
+                        startCountdown(data.remaining_seconds);
+                        showError('Kunci limit telah digunakan hari ini. Gunakan Kunci Tetap untuk masuk.');
+                    } else {
+                        showError('Kunci akses tidak valid. Silakan coba lagi.');
+                    }
+                }
+            } catch (e) {
+                showError('Gagal terhubung ke server. Periksa koneksi Anda.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        SUBMIT_BTN.addEventListener('click', submit);
+        KEY_INPUT.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    })();
+    </script>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
